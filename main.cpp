@@ -112,12 +112,12 @@ void divideSquare(bool first, unsigned x, unsigned y, unsigned w, unsigned h, do
 		//middle = (topLeft + topRight + botLeft + botRight + heightDist(generator)) / 5.0;
 		middle = (topLeft + topRight + botLeft + botRight) / 4.0 + roughDist(generator);
 	
-	// keep bounds
+	// clamp to 0..1
 	if(middle < 0)
 		middle = 0;
 	if(middle > 1)
 		middle = 1;
-		
+	
 	// assign values
 	// corners
 	heights[(x % size.x) + (y % size.y) * size.x] = topLeft;
