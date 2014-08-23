@@ -10,6 +10,7 @@ bool done = false;
 
 std::mt19937 generator;
 std::uniform_real_distribution<double> heightDist(0, 1);
+std::uniform_real_distribution<double> roughDist;
 std::uniform_int_distribution<int> startDist(-10000, 10000);
 
 sf::Vector2u size;
@@ -18,15 +19,26 @@ void divideSquare(bool first, unsigned x, unsigned y, unsigned w, unsigned h, do
 
 int main(int argc, char** argv)
 {
-	if(argc != 3)
+	if(argc != 4)
 	{
-		std::cerr << "Incorrect # of args, must be 2.\n";
+		std::cerr << "Incorrect # of args, must be 3.\n";
 		return 1;
 	}
 
 	size = {static_cast<unsigned>(std::stoi(argv[1])), static_cast<unsigned>(std::stoi(argv[2]))};
+	
 	// resize vector to correct size
 	heights.resize(size.x * size.y, 0);
+	
+	double roughness = std::stod(argv[3]);
+	
+	// clamp roughness variable to 0..1
+	if(roughness < 0)
+		roughness = 0;
+	if(roughness > 1)
+		roughness = 1;
+	
+	roughDist = std::uniform_real_distribution<double>(-roughness, roughness);
 
 	// seed generator
 	generator.seed(std::chrono::system_clock::now().time_since_epoch().count());
@@ -97,8 +109,15 @@ void divideSquare(bool first, unsigned x, unsigned y, unsigned w, unsigned h, do
 	if(first)
 		middle = heightDist(generator);
 	else
-		middle = (topLeft + topRight + botLeft + botRight + heightDist(generator)) / 5.0;
-
+		//middle = (topLeft + topRight + botLeft + botRight + heightDist(generator)) / 5.0;
+		middle = (topLeft + topRight + botLeft + botRight) / 4.0 + roughDist(generator);
+	
+	// keep bounds
+	if(middle < 0)
+		middle = 0;
+	if(middle > 1)
+		middle = 1;
+		
 	// assign values
 	// corners
 	heights[(x % size.x) + (y % size.y) * size.x] = topLeft;
